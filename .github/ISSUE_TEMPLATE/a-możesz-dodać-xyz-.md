@@ -2,7 +2,7 @@
 name: A możesz dodać XYZ?
 about: Zgłoś pomysł na funkcjonalność, moduł, wsparcie API
 title: "[FEAT]"
-labels: ''
+labels: 'poprawki'
 assignees: asterixix
 
 ---
