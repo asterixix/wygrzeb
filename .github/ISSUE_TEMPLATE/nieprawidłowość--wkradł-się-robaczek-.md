@@ -2,7 +2,7 @@
 name: Nieprawidłowość (wkradł się robaczek)
 about: Zgłoś nieprawidłowość/problem w kodzie
 title: "[BUG]"
-labels: ''
+labels: 'błąd'
 assignees: asterixix
 
 ---
