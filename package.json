@@ -2,23 +2,35 @@
   "name": "wygrzeb",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.1"
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.19",
+    "@mui/material": "^5.14.20",
+    "@mui/x-date-pickers": "^6.18.4",
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
+    "next": "14.0.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "serpapi": "^2.1.0",
+    "twitter-api-v2": "^1.22.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.3",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5"
   }
 }
