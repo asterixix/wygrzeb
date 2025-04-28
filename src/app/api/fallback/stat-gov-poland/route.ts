@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import axios from 'axios';
 import { FactCheckResult } from '@/types/api';
-
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    // Get search parameters from URL
-    const searchParams = request.nextUrl.searchParams;
+    // Parse query parameters
+    const { searchParams } = new URL(request.url);
     const query = searchParams.get('query') || '';
     const area = searchParams.get('area') || '';
     const topic = searchParams.get('topic') || '';
@@ -16,13 +15,13 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     const format = searchParams.get('format') || 'json';
     const lang = searchParams.get('lang') || 'pl';
-    
-    // API key from environment variables
+
+    // API key from environment variables (optional)
     const apiKey = process.env.STAT_GOV_API_KEY;
-    
+
     // Base URL for STAT GOV API
     const baseUrl = 'https://api-dbw.stat.gov.pl/api/1.1.0';
-    
+
     // Prepare parameters for API request
     const params: any = {
       page,
@@ -32,37 +31,19 @@ export async function GET(request: NextRequest) {
       sort_by: sortBy,
       sort_order: sortOrder,
     };
-    
-    // Add query parameter if provided
-    if (query) {
-      params.q = query;
-    }
-    
-    // Add optional filters if provided
-    if (area) {
-      params.area = area;
-    }
-    
-    if (topic) {
-      params.topic = topic;
-    }
-    
-    if (year) {
-      params.year = year;
-    }
-    
+    if (query) params.q = query;
+    if (area) params.area = area;
+    if (topic) params.topic = topic;
+    if (year) params.year = year;
+
     // Prepare request headers
     const headers: Record<string, string> = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     };
-    
-    // Add API key to headers if available
-    if (apiKey) {
-      headers['X-ClientId'] = apiKey;
-    }
-    
-    // Determine which endpoint to use based on parameters
+    if (apiKey) headers['X-ClientId'] = apiKey;
+
+    // Determine endpoint
     let endpoint = '/indicators';
     if (query) {
       endpoint = '/search';
@@ -71,32 +52,28 @@ export async function GET(request: NextRequest) {
     } else if (topic) {
       endpoint = '/topics';
     }
-    
+
     // Make the API request
     const response = await axios.get(`${baseUrl}${endpoint}`, {
       params,
       headers,
     });
-    
-    // Check for successful response
+
     if (response.status !== 200) {
       return NextResponse.json(
         { error: `Failed to fetch STAT GOV data: ${response.statusText}` },
         { status: response.status }
       );
     }
-    
-    // Process the data
+
     const data = response.data;
     const items = data.results || [];
-    
-    // Transform STAT GOV items to our FactCheckResult format
+
+    // Map to FactCheckResult[]
     const results: FactCheckResult[] = items.map((item: any, index: number) => {
-      // Determine the type of result based on the endpoint
       const resultType = endpoint === '/indicators' ? 'statistic' : 
                         endpoint === '/topics' ? 'topic' : 
                         endpoint === '/areas' ? 'area' : 'search';
-      
       return {
         id: `statgov-${item.id || Date.now()}-${index}`,
         title: item.title || item.name || `Statistics ${index + 1}`,
@@ -124,7 +101,7 @@ export async function GET(request: NextRequest) {
         }
       };
     });
-    
+
     return NextResponse.json({
       results,
       totalResults: data.total || results.length,
@@ -136,13 +113,10 @@ export async function GET(request: NextRequest) {
       queryParams: params
     });
   } catch (error: any) {
-    console.error('Error fetching data from STAT GOV API:', error);
-    
-    // Handle specific error cases
+    console.error('Stat Gov Poland fallback error:', error);
     if (error.response) {
       const status = error.response.status;
       const message = error.response.data?.message || error.response.statusText;
-      
       if (status === 401 || status === 403) {
         return NextResponse.json(
           { 
@@ -152,7 +126,6 @@ export async function GET(request: NextRequest) {
           { status }
         );
       }
-      
       if (status === 404) {
         return NextResponse.json(
           { 
@@ -162,7 +135,6 @@ export async function GET(request: NextRequest) {
           { status }
         );
       }
-      
       if (status === 429) {
         return NextResponse.json(
           { 
@@ -173,10 +145,9 @@ export async function GET(request: NextRequest) {
         );
       }
     }
-    
     return NextResponse.json(
       { error: 'Failed to fetch data from STAT GOV API', message: error.message },
       { status: 500 }
     );
   }
-}
+} 

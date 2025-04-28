@@ -53,10 +53,10 @@ export async function GET(request: NextRequest) {
     };
 
     const url = new URL('https://newsapi.org/v2/everything');
-    url.searchParams.append('q', query);
-    url.searchParams.append('page', page.toString());
-    url.searchParams.append('pageSize', pageSize.toString());
-    url.searchParams.append('language', language);
+    url.searchParams.append('q', apiParams.query);
+    url.searchParams.append('page', apiParams.page.toString());
+    url.searchParams.append('pageSize', apiParams.pageSize.toString());
+    url.searchParams.append('language', apiParams.language);
 
     const response = await fetch(url.toString(), {
       headers: {

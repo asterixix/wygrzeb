@@ -63,3 +63,21 @@ export interface SearchFilters {
     language: string | null;
     sortBy: 'relevance' | 'date';
 }
+
+export interface SearchFiltersType {
+  sources: Source[];
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  language: string;
+  country: string;
+  theme: string;
+  format: string;
+  goal: string;
+  datasetType: string;
+  source: string;
+  category: string;
+  sortBy: string;
+  sourceCategory: string;
+}

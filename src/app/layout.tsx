@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
 import { SearchProvider } from "@/context/SearchContext";
-import ThemeRegistry from "@/components/ThemeRegistry"; // Import the new ThemeRegistry
+import "./globals.css";
+import ThemeToggle from '@/components/layout/ThemeToggle';
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Wygrzeb Search", // Example title
-  description: "Comprehensive search application", // Example description
+  title: "Wygrzeb",
+  description: "Inteligentna wyszukiwarka informacji",
 };
 
 export default function RootLayout({
@@ -17,13 +17,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pl" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeRegistry>
-          <SearchProvider>
-            {children}
-          </SearchProvider>
-        </ThemeRegistry>
+        <SearchProvider>
+          <ThemeToggle />
+          <main>{children}</main>
+        </SearchProvider>
       </body>
     </html>
   );

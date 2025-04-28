@@ -58,7 +58,7 @@ export const fetchApiData = async (
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`API Error ${response.status} from ${endpoint}:`, errorText);
-      throw new Error(`API returned ${response.status}`);
+      return { results: [], total: 0 };
     }
     
     const data: ApiResponse = await response.json();
@@ -68,15 +68,8 @@ export const fetchApiData = async (
       total: data.totalResults || data.results?.length || 0
     };
   } catch (error) {
-    console.error(`Error fetching data for source ${sourceId}:`, error);
-    
-    // Try fallback if main request fails
-    try {
-      return await fetchFallbackData(sourceId, params);
-    } catch (fallbackError) {
-      console.error(`Fallback also failed for ${sourceId}:`, fallbackError);
-      return { results: [], total: 0 };
-    }
+    console.error(`Error fetching data for source ${sourceId} from ${endpoint}:`, error);
+    return { results: [], total: 0 };
   }
 };
 
@@ -86,7 +79,6 @@ export const fetchApiData = async (
 export const getEndpointForSource = (sourceId: string, queryParams: string): string => {
   const apiEndpoints: Record<string, string> = {
     'newsapi': '/api/news',
-    'google-fact-check': '/api/fact-check',
     'google-news': '/api/google-news',
     'twitter': '/api/twitter',
     'dane-gov-pl': '/api/polish-data/dane-gov',
@@ -96,34 +88,6 @@ export const getEndpointForSource = (sourceId: string, queryParams: string): str
   
   const endpoint = apiEndpoints[sourceId] || `/api/${sourceId}`;
   return `${endpoint}?${queryParams}`;
-};
-
-/**
- * Attempts to fetch from a fallback API endpoint
- */
-export const fetchFallbackData = async (
-  sourceId: string, 
-  params: ApiSearchParams
-): Promise<{ results: SearchResultUnion[], total: number }> => {
-  const queryString = buildQueryParams(params);
-  const fallbackEndpoint = `/api/fallback/${sourceId}?${queryString.toString()}`;
-  
-  console.log(`Trying fallback endpoint: ${fallbackEndpoint}`);
-  
-  const response = await fetch(fallbackEndpoint);
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`Fallback API Error ${response.status} from ${fallbackEndpoint}:`, errorText);
-    throw new Error(`Fallback API returned ${response.status}`);
-  }
-  
-  const data: ApiResponse = await response.json();
-  
-  return {
-    results: data.results || [],
-    total: data.totalResults || data.results?.length || 0
-  };
 };
 
 /**

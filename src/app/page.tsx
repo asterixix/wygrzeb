@@ -2,31 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Box, 
-  Typography, 
-  TextField, 
-  Button, 
-  Container, 
-  Grid, 
-  Card, 
-  CardContent,
-  Paper,
-  InputAdornment,
-  IconButton,
-  Link as MuiLink,
-  Tooltip
-} from "@mui/material";
-import SearchIcon from '@mui/icons-material/Search';
-import NewspaperIcon from '@mui/icons-material/Newspaper';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import InfoIcon from '@mui/icons-material/Info';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import Link from "next/link";
+import { 
+  NewspaperIcon,
+  ChartBarIcon, 
+  MagnifyingGlassCircleIcon, 
+  ShieldCheckIcon, 
+  AdjustmentsHorizontalIcon,
+  InformationCircleIcon,
+  ChatBubbleLeftRightIcon, // For Twitter/Social
+} from '@heroicons/react/24/outline';
+import Image from 'next/image';
+import wygrzebLogoBlack from '@/images/wygrzeb-logo-black.svg';
+import wygrzebLogoWhite from '@/images/wygrzeb-logo-white.svg';
+import Footer from '@/components/layout/Footer';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,364 +31,162 @@ export default function Home() {
   };
 
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        minHeight: '100vh',
-        background: 'var(--background)',
-        color: 'var(--foreground)'
-      }}
-    >
-      <Container maxWidth="lg" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 8 }}>
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            <span style={{ color: 'var(--primary)' }}>Wygrzeb</span>
-          </Typography>
-          <Typography variant="h5" color="text.secondary" sx={{ mb: 4, maxWidth: '800px', mx: 'auto' }}>
+    <div className="flex flex-col min-h-screen bg-base-100 text-base-content">
+      <div className="container mx-auto px-4 flex-grow flex flex-col justify-center py-16">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-4">
+            {/* Wygrzeb Logo: show black in light mode, white in dark mode */}
+            <span className="block w-full flex justify-center">
+              <Image
+                src={wygrzebLogoBlack}
+                alt="Wygrzeb logo"
+                width={180}
+                height={54}
+                className="h-16 w-auto dark:hidden"
+                draggable="false"
+                priority
+              />
+              <Image
+                src={wygrzebLogoWhite}
+                alt="Wygrzeb logo"
+                width={180}
+                height={54}
+                className="h-16 w-auto hidden dark:block"
+                draggable="false"
+                priority
+              />
+            </span>
+          </h1>
+          <p className="text-xl text-base-content/70 mb-8 max-w-3xl mx-auto">
             Inteligentne wyszukiwanie faktów, statystyk i aktualnych informacji z
             wiarygodnych źródeł krajowych i zagranicznych
-          </Typography>
+          </p>
 
-          <Paper 
-            component="form" 
-            onSubmit={handleSearch} 
-            elevation={2} 
-            sx={{ 
-              p: 0.5, 
-              display: 'flex', 
-              maxWidth: '600px', 
-              mx: 'auto', 
-              mb: 6,
-              bgcolor: 'var(--input-background)',
-              border: '1px solid var(--input-border)',
-              borderRadius: 'var(--radius-lg)',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                borderColor: 'var(--primary)'
-              }
-            }}
-          >
-            <TextField
-              fullWidth
-              variant="outlined"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Wyszukaj fakty, dane, statystyki i wiadomości..."
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton 
-                      type="submit" 
-                      aria-label="search"
-                      disabled={isLoading || !searchQuery.trim()}
-                      sx={{
-                        color: 'var(--primary)',
-                        '&:hover': {
-                          backgroundColor: 'rgba(25, 118, 210, 0.08)'
-                        }
-                      }}
-                    >
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                sx: { 
-                  px: 1,
-                  color: 'var(--input-foreground)'
-                }
-              }}
-              sx={{ 
-                '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                '& .MuiInputBase-input': {
-                  color: 'var(--input-foreground)'
-                }
-              }}
-            />
-          </Paper>
-
-          <Grid container spacing={3} sx={{ mb: 6 }}>
-            <Grid xs={12} sm={6} md={4}>
-              <Card 
-                elevation={2} 
-                sx={{ 
-                  height: '100%',
-                  bgcolor: 'var(--card-bg)',
-                  border: '1px solid var(--card-border)',
-                  borderLeft: '4px solid var(--news-color)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                  }
-                }}
+          <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-12">
+            <div className="join w-full shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-base-300 rounded-lg hover:border-primary">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Wyszukaj fakty, dane, statystyki i wiadomości..."
+                className="input input-bordered join-item w-full focus:outline-none focus:ring-0"
+              />
+              <button 
+                type="submit" 
+                aria-label="search"
+                disabled={isLoading || !searchQuery.trim()}
+                className="btn btn-primary join-item"
               >
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <NewspaperIcon color="primary" sx={{ fontSize: 40, mb: 2 }} />
-                  <Typography variant="h6" component="h3" gutterBottom>
-                    Wiadomości
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Bieżące informacje z polskich i zagranicznych źródeł informacyjnych
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                {isLoading ? <span className="loading loading-spinner"></span> : 'Szukaj'} 
+              </button>
+            </div>
+          </form>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
+            <div className="card bg-base-100 shadow-md border border-base-300 border-l-4 border-l-blue-500 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+              <div className="card-body items-center text-center">
+                <NewspaperIcon className="text-blue-500 h-10 w-10 mb-2" /> 
+                <h3 className="card-title">Wiadomości</h3>
+                <p className="text-base-content/70">Bieżące informacje z polskich i zagranicznych źródeł informacyjnych</p>
+              </div>
+            </div>
             
-            <Grid xs={12} sm={6} md={4}>
-              <Card 
-                elevation={2} 
-                sx={{ 
-                  height: '100%',
-                  bgcolor: 'var(--card-bg)',
-                  border: '1px solid var(--card-border)',
-                  borderLeft: '4px solid var(--factcheck-color)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                  }
-                }}
-              >
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <VerifiedIcon sx={{ fontSize: 40, mb: 2, color: 'var(--factcheck-color)' }} />
-                  <Typography variant="h6" component="h3" gutterBottom>
-                    Weryfikacja faktów
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Zweryfikowane informacje z niezależnych organizacji fact-checkingowych
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+            <div className="card bg-base-100 shadow-md border border-base-300 border-l-4 border-l-green-500 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+              <div className="card-body items-center text-center">
+                <h3 className="card-title">Weryfikacja faktów</h3>
+                <p className="text-base-content/70">Zweryfikowane informacje z niezależnych organizacji fact-checkingowych</p>
+              </div>
+            </div>
             
-            <Grid xs={12} sm={6} md={4}>
-              <Card 
-                elevation={2} 
-                sx={{ 
-                  height: '100%',
-                  bgcolor: 'var(--card-bg)',
-                  border: '1px solid var(--card-border)',
-                  borderLeft: '4px solid var(--dataset-color)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
-                  }
-                }}
-              >
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <BarChartIcon sx={{ fontSize: 40, mb: 2, color: 'var(--dataset-color)' }} />
-                  <Typography variant="h6" component="h3" gutterBottom>
-                    Dane i statystyki
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Oficjalne dane z Głównego Urzędu Statystycznego i dane.gov.pl
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+            <div className="card bg-base-100 shadow-md border border-base-300 border-l-4 border-l-orange-500 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+              <div className="card-body items-center text-center">
+                <ChartBarIcon className="text-orange-500 h-10 w-10 mb-2" />
+                <h3 className="card-title">Dane i statystyki</h3>
+                <p className="text-base-content/70">Oficjalne dane z Głównego Urzędu Statystycznego i dane.gov.pl</p>
+              </div>
+            </div>
+          </div>
 
-          <Grid container spacing={4} justifyContent="center">
-            {/* Feature 1 */}
-            <Grid xs={12} sm={6} md={4}>
-              <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
-                <SearchIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Wszechstronne Wyszukiwanie
-                </Typography>
-                <Typography>
-                  Agreguj wyniki z wielu źródeł: wiadomości, fact-checków, danych rządowych i mediów społecznościowych.
-                </Typography>
-              </Paper>
-            </Grid>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="p-6 shadow-lg rounded-lg text-center bg-base-200">
+              <MagnifyingGlassCircleIcon className="text-primary h-12 w-12 mx-auto mb-3" />
+              <h3 className="text-xl font-semibold mb-2">Wszechstronne Wyszukiwanie</h3>
+              <p className="text-base-content/80">Agreguj wyniki z wielu źródeł: wiadomości, fact-checków, danych rządowych i mediów społecznościowych.</p>
+            </div>
+            <div className="p-6 shadow-lg rounded-lg text-center bg-base-200">
+              <ShieldCheckIcon className="text-primary h-12 w-12 mx-auto mb-3" />
+              <h3 className="text-xl font-semibold mb-2">Weryfikacja Informacji</h3>
+              <p className="text-base-content/80">Szybko sprawdzaj fakty i identyfikuj potencjalną dezinformację dzięki dostępowi do wiarygodnych źródeł.</p>
+            </div>
+            <div className="p-6 shadow-lg rounded-lg text-center bg-base-200">
+              <AdjustmentsHorizontalIcon className="text-primary h-12 w-12 mx-auto mb-3" />
+              <h3 className="text-xl font-semibold mb-2">Zaawansowane Filtrowanie</h3>
+              <p className="text-base-content/80">Precyzuj wyszukiwanie za pomocą filtrów daty, źródła, typu danych i trafności.</p>
+            </div>
+          </div>
 
-            {/* Feature 2 */}
-            <Grid xs={12} sm={6} md={4}>
-              <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
-                <FactCheckIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Weryfikacja Informacji
-                </Typography>
-                <Typography>
-                  Szybko sprawdzaj fakty i identyfikuj potencjalną dezinformację dzięki dostępowi do wiarygodnych źródeł.
-                </Typography>
-              </Paper>
-            </Grid>
-
-            {/* Feature 3 */}
-            <Grid xs={12} sm={6} md={4}>
-              <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
-                <FilterAltIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Zaawansowane Filtrowanie
-                </Typography>
-                <Typography>
-                  Precyzuj wyszukiwanie za pomocą filtrów daty, źródła, typu danych i trafności.
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 2,
-              justifyContent: 'center',
-              mb: 6
-            }}
-          >
-            <Button 
-              variant="contained" 
-              component={Link} 
-              href="/search"
-              size="large"
-              sx={{
-                bgcolor: 'var(--primary)',
-                '&:hover': {
-                  bgcolor: 'var(--primary-hover)'
-                }
-              }}
-            >
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <Link href="/search" className="btn btn-primary btn-lg">
               Przejdź do zaawansowanego wyszukiwania
-            </Button>
-            <Button 
-              variant="outlined" 
-              component="a" 
+            </Link>
+            <a 
               href="https://github.com/yourusername/wygrzeb" 
               target="_blank" 
               rel="noopener noreferrer"
-              size="large"
-              startIcon={<GitHubIcon />}
-              sx={{
-                borderColor: 'var(--primary)',
-                color: 'var(--primary)',
-                '&:hover': {
-                  borderColor: 'var(--primary-hover)',
-                  bgcolor: 'rgba(25, 118, 210, 0.08)'
-                }
-              }}
+              className="btn btn-outline btn-lg gap-2"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.237 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
               Zobacz kod źródłowy
-            </Button>
-          </Box>
+            </a>
+          </div>
 
-          <Box sx={{ my: 6 }}>
-            <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ mb: 4 }}>
-              Nasze Źródła Danych
-            </Typography>
-            <Grid container spacing={3} justifyContent="center">
-              {/* Source 1 */}
-              <Grid xs={12} sm={6} md={4}>
-                <Paper elevation={2} sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-                  <NewspaperIcon sx={{ mr: 1.5, color: 'primary.main' }} />
-                  <Typography variant="body1">Wiadomości (Google News, NewsAPI)</Typography>
-                </Paper>
-              </Grid>
-              {/* Source 2 */}
-              <Grid xs={12} sm={6} md={4}>
-                <Paper elevation={2} sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-                  <FactCheckIcon sx={{ mr: 1.5, color: 'primary.main' }} />
-                  <Typography variant="body1">Fact-Checking (Google Fact Check)</Typography>
-                </Paper>
-              </Grid>
-              {/* Source 3 */}
-              <Grid xs={12} sm={6} md={4}>
-                <Paper elevation={2} sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-                  <TwitterIcon sx={{ mr: 1.5, color: 'primary.main' }} />
-                  <Typography variant="body1">Media Społecznościowe (Twitter/X)</Typography>
-                </Paper>
-              </Grid>
-            </Grid>
-          </Box>
+          <div className="my-12">
+            <h2 className="text-3xl font-bold text-center mb-6">Nasze Źródła Danych</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 justify-center">
+              <div className="p-4 shadow rounded-lg bg-base-200 flex items-center gap-2">
+                <NewspaperIcon className="h-5 w-5 text-blue-500" /> Wiadomości (Google News, NewsAPI)
+              </div>
+              <div className="p-4 shadow rounded-lg bg-base-200 flex items-center gap-2">
+                <ChatBubbleLeftRightIcon className="h-5 w-5 text-sky-500" /> Media Społecznościowe (Twitter/X)
+              </div>
+            </div>
+          </div>
 
-          <Paper
-            elevation={1}
-            sx={{
-              p: 3,
-              mx: 'auto',
-              maxWidth: '800px',
-              bgcolor: 'var(--card-bg)',
-              border: '1px solid var(--card-border)',
-              borderRadius: 'var(--radius-md)'
-            }}
-          >
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-              <InfoIcon sx={{ mr: 1, color: 'var(--info)' }} fontSize="small" />
-              Dostępne źródła danych
-            </Typography>
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid xs={12} sm={6} md={4}>
-                <Typography variant="body2" component="div">
-                  <strong>Polskie:</strong>
-                  <ul style={{ paddingLeft: '20px', marginTop: '4px' }}>
-                    <li>GUS / Stat.gov.pl</li>
-                    <li>Dane.gov.pl</li>
-                    <li>Polskie media</li>
-                  </ul>
-                </Typography>
-              </Grid>
-              <Grid xs={12} sm={6} md={4}>
-                <Typography variant="body2" component="div">
-                  <strong>Zagraniczne:</strong>
-                  <ul style={{ paddingLeft: '20px', marginTop: '4px' }}>
-                    <li>Google News</li>
-                    <li>Google Fact Check</li>
-                    <li>Media międzynarodowe</li>
-                  </ul>
-                </Typography>
-              </Grid>
-              <Grid xs={12} sm={6} md={4}>
-                <Typography variant="body2" component="div">
-                  <strong>Media społecznościowe:</strong>
-                  <ul style={{ paddingLeft: '20px', marginTop: '4px' }}>
-                    <li>Twitter/X</li>
-                    <Tooltip title="Wkrótce dostępne">
-                      <li style={{ color: 'var(--muted)' }}>Facebook (wkrótce)</li>
-                    </Tooltip>
-                  </ul>
-                </Typography>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Box>
-      </Container>
+          <div className="card bg-base-200 shadow-md max-w-3xl mx-auto p-6 border border-base-300 rounded-lg">
+            <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <InformationCircleIcon className="h-5 w-5 text-info" /> Dostępne źródła danych
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+              <div>
+                <strong className="block mb-1">Polskie:</strong>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>GUS / Stat.gov.pl</li>
+                  <li>Dane.gov.pl</li>
+                  <li>Polskie media</li>
+                </ul>
+              </div>
+              <div>
+                <strong className="block mb-1">Zagraniczne:</strong>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Google News</li>
+                  <li>Media międzynarodowe</li>
+                </ul>
+              </div>
+              <div>
+                <strong className="block mb-1">Media społecznościowe:</strong>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Twitter/X</li>
+                  <div className="tooltip tooltip-bottom" data-tip="Wkrótce dostępne">
+                    <li className="text-base-content/50 cursor-default">Facebook (wkrótce)</li>
+                  </div>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Box 
-        component="footer" 
-        sx={{ 
-          py: 3, 
-          borderTop: 1, 
-          borderColor: 'var(--border)', 
-          bgcolor: 'var(--background)'
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: { xs: 2, md: 0 } }}>
-              © 2025 Wygrzeb - Inteligentna wyszukiwarka informacji
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 3 }}>
-              <MuiLink href="/about" color="text.secondary" underline="hover" variant="body2">
-                O projekcie
-              </MuiLink>
-              <MuiLink href="/privacy" color="text.secondary" underline="hover" variant="body2">
-                Prywatność
-              </MuiLink>
-              <MuiLink href="/contact" color="text.secondary" underline="hover" variant="body2">
-                Kontakt
-              </MuiLink>
-              <MuiLink href="https://twitter.com/wygrzeb" color="text.secondary" underline="hover" variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                <TwitterIcon fontSize="small" sx={{ mr: 0.5 }} />
-                Twitter
-              </MuiLink>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
-    </Box>
+      <Footer />
+    </div>
   );
 }

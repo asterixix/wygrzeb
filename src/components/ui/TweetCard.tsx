@@ -1,35 +1,29 @@
+"use client";
+
 import React from 'react';
-import { 
-  Card, 
-  CardContent, 
-  Typography, 
-  Box, 
-  Link,
-  IconButton,
-  Divider,
-  Tooltip,
-  Chip,
-  Avatar,
-  Stack
-} from '@mui/material';
 import { Tweet } from '@/types/news';
-import ShareIcon from '@mui/icons-material/Share';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import RepeatIcon from '@mui/icons-material/Repeat';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import LaunchIcon from '@mui/icons-material/Launch';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import { format } from 'date-fns';
 import pl from 'date-fns/locale/pl';
+import Link from 'next/link'; // Use Next.js Link for internal routing if needed
+import { 
+  CheckBadgeIcon as CheckBadgeIconSolid,
+  BookmarkIcon as BookmarkIconSolid,
+} from '@heroicons/react/24/solid';
+import { 
+  BookmarkIcon as BookmarkIconOutline,
+  ShareIcon,
+  ChatBubbleOvalLeftIcon,
+  ArrowPathRoundedSquareIcon,
+  HeartIcon,
+  EyeIcon,
+  ArrowTopRightOnSquareIcon,
+} from '@heroicons/react/24/outline';
 
 interface TweetMetrics {
   replies?: number;
   retweets?: number;
   likes?: number;
-  views?: number; // Assuming 'views' corresponds to 'impression_count'
+  views?: number;
 }
 
 interface TweetCardProps {
@@ -44,7 +38,6 @@ const TweetCard: React.FC<TweetCardProps> = ({
   isBookmarked = false 
 }) => {
   
-  // Format date with error handling
   const formattedDate = tweet.date ? formatDate(tweet.date) : null;
   
   function formatDate(dateString: string) {
@@ -52,216 +45,175 @@ const TweetCard: React.FC<TweetCardProps> = ({
       return format(new Date(dateString), 'd MMMM yyyy • HH:mm', { locale: pl });
     } catch (error) {
       console.error("Error formatting date:", error);
-      return dateString; // Return the original string if can't format
+      return dateString;
     }
   }
   
-  // Format numbers with K, M suffixes
   const formatNumber = (num: number | undefined): string => {
     if (num === undefined) return '0';
-    
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-    }
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
     return num.toString();
   };
   
-  // Safely access properties
   const metrics: TweetMetrics = tweet.metrics || {};
   const author = tweet.author || {
     name: 'Unknown User',
     username: 'unknown',
     profileImage: null,
-    verified: false // Add default for verified if needed, or handle optional chaining below
+    verified: false
   };
   
-  // Check if this is a fallback tweet
   const isFallback = tweet.metadata?.fallbackNotice || tweet.metadata?.isFallback || false;
+
+  // Determine the image URL to display
+  let displayMediaUrl: string | null = null;
+  if (tweet.media) {
+    if (typeof tweet.media === 'string') {
+      displayMediaUrl = tweet.media;
+    } else if (Array.isArray(tweet.media) && tweet.media.length > 0) {
+      // Find the first image or fallback to the first media item's URL
+      const firstImage = tweet.media.find(m => m.type === 'image');
+      displayMediaUrl = firstImage ? firstImage.url : tweet.media[0].url;
+    }
+  }
   
   return (
-    <Card 
-      elevation={1}
-      sx={{ 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'all 0.2s ease-in-out',
-        '&:hover': {
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          transform: 'translateY(-2px)'
-        },
-        borderLeft: '4px solid var(--tweet-color)'
-      }}
-      className="tweet-card"
-    >
-      <CardContent sx={{ flexGrow: 1, pt: 2, pb: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar 
-              src={author.profileImage || undefined} 
-              alt={author.name}
-              sx={{ width: 48, height: 48, mr: 1.5 }}
-            >
-              {author.name.charAt(0)}
-            </Avatar>
-            
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography 
-                  variant="subtitle1" 
-                  component="span" 
-                  fontWeight="medium"
-                  sx={{ mr: 0.5 }}
-                >
-                  {author.name}
-                </Typography>
-                
-                {author.verified && (
-                  <Tooltip title="Verified Account">
-                    <VerifiedIcon 
-                      fontSize="small" 
-                      sx={{ ml: 0.5, color: 'var(--tweet-color)' }} 
-                    />
-                  </Tooltip>
+    // Use DaisyUI card component
+    <div className="card card-compact bg-base-100 shadow-md border border-base-300 border-l-4 border-l-blue-500 transition-all duration-200 ease-in-out hover:shadow-lg hover:-translate-y-0.5 h-full flex flex-col tweet-card">
+      <div className="card-body flex-grow pb-2">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center">
+            {/* DaisyUI Avatar */}
+            <div className="avatar mr-3">
+              <div className="w-12 h-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
+                {author.profileImage ? (
+                  <img src={author.profileImage} alt={author.name} />
+                ) : (
+                  <span className="text-xl flex items-center justify-center w-full h-full bg-neutral-focus text-neutral-content">
+                    {author.name.charAt(0)}
+                  </span>
                 )}
-              </Box>
-              
-              <Typography variant="body2" color="text.secondary">
-                @{author.username}
-              </Typography>
-            </Box>
-          </Box>
-          
-          <Box>
-            <IconButton 
-              size="small" 
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center">
+                <span className="font-medium mr-1">{author.name}</span>
+                {author.verified && (
+                  <div className="tooltip tooltip-right" data-tip="Verified Account">
+                    <CheckBadgeIconSolid className="h-5 w-5 text-blue-500" /> 
+                  </div>
+                )}
+              </div>
+              <span className="text-sm text-base-content/70">@{author.username}</span>
+            </div>
+          </div>
+          <div className="flex items-center">
+            {/* Bookmark and Share Buttons */}
+            <button 
+              className={`btn btn-ghost btn-sm btn-circle ${isBookmarked ? 'text-primary' : ''}`}
               onClick={() => onBookmark && onBookmark(tweet)}
-              color={isBookmarked ? 'primary' : 'default'}
+              aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
             >
-              {isBookmarked ? <BookmarkIcon fontSize="small" /> : <BookmarkBorderIcon fontSize="small" />}
-            </IconButton>
-            
-            <IconButton size="small">
-              <ShareIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        </Box>
+              {isBookmarked ? <BookmarkIconSolid className="h-5 w-5"/> : <BookmarkIconOutline className="h-5 w-5"/>}
+            </button>
+            <button className="btn btn-ghost btn-sm btn-circle" aria-label="Share tweet">
+              <ShareIcon className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
         
-        <Typography 
-          variant="body1" 
-          paragraph
-          sx={{ 
-            whiteSpace: 'pre-wrap', 
-            mb: 2,
-            wordBreak: 'break-word'
-          }}
-        >
+        {/* Content */}
+        <p className="whitespace-pre-wrap break-words mb-3">
           {tweet.content || 'No content available'}
-        </Typography>
+        </p>
         
+        {/* Fallback Notice */}
         {isFallback && (
-          <Box sx={{ mb: 2 }}>
-            <Chip
-              size="small"
-              label="FALLBACK DATA"
-              sx={{ 
-                bgcolor: 'var(--warning)',
-                color: 'white',
-                fontWeight: 'bold'
-              }}
-            />
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+          <div className="mb-3">
+            <div className="badge badge-warning text-white font-bold">FALLBACK DATA</div>
+            <p className="text-xs text-base-content/70 mt-1">
               {typeof isFallback === 'string' 
                 ? isFallback 
                 : "This is fallback data as the Twitter API is currently unavailable."}
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
         
-        {tweet.media && (
-          <Box 
-            sx={{ 
-              mt: 1, 
-              mb: 2, 
-              borderRadius: 2,
-              overflow: 'hidden',
-              height: 200,
-              background: `url(${tweet.media}) no-repeat center center`,
-              backgroundSize: 'cover'
-            }}
-          />
+        {/* Media */}
+        {displayMediaUrl && (
+          <figure className="mt-1 mb-3 rounded-lg overflow-hidden h-48">
+            <img src={displayMediaUrl} alt="Tweet media" className="w-full h-full object-cover" />
+          </figure>
         )}
         
+        {/* Date */}
         {formattedDate && (
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1, mb: 2 }}>
+          <p className="text-xs text-base-content/70 mt-1 mb-3">
             {formattedDate}
-          </Typography>
+          </p>
         )}
-      </CardContent>
+      </div>
       
-      <Box sx={{ mt: 'auto', width: '100%' }}>
-        <Divider />
-        
-        <Box sx={{ px: 2, py: 1 }}>
-          <Stack direction="row" spacing={3} justifyContent="space-between" alignItems="center">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Tooltip title="Replies">
-                <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                  <ChatBubbleOutlineIcon sx={{ fontSize: '1rem', mr: 0.5, color: 'text.secondary' }} />
-                  <Typography variant="caption" color="text.secondary">
-                    {formatNumber(metrics.replies)}
-                  </Typography>
-                </Box>
-              </Tooltip>
-              
-              <Tooltip title="Retweets">
-                <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                  <RepeatIcon sx={{ fontSize: '1rem', mr: 0.5, color: 'text.secondary' }} />
-                  <Typography variant="caption" color="text.secondary">
-                    {formatNumber(metrics.retweets)}
-                  </Typography>
-                </Box>
-              </Tooltip>
-              
-              <Tooltip title="Likes">
-                <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                  <FavoriteBorderIcon sx={{ fontSize: '1rem', mr: 0.5, color: 'text.secondary' }} />
-                  <Typography variant="caption" color="text.secondary">
-                    {formatNumber(metrics.likes)}
-                  </Typography>
-                </Box>
-              </Tooltip>
-              
-              {metrics.views !== undefined && (
-                <Tooltip title="Views">
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <VisibilityIcon sx={{ fontSize: '1rem', mr: 0.5, color: 'text.secondary' }} />
-                    <Typography variant="caption" color="text.secondary">
-                      {formatNumber(metrics.views)}
-                    </Typography>
-                  </Box>
-                </Tooltip>
-              )}
-            </Box>
-            
-            <Tooltip title="View on Twitter">
-              <IconButton 
-                component={Link}
+      {/* Footer with Metrics */}
+      <div className="mt-auto w-full">
+        <div className="divider my-0"></div>
+        <div className="px-4 py-2 flex justify-between items-center text-sm">
+          <div className="flex space-x-4">
+            {/* Replies */}
+            <div className="tooltip" data-tip="Replies">
+              <div className="flex items-center text-base-content/70">
+                <ChatBubbleOvalLeftIcon className="h-4 w-4 mr-1" /> {formatNumber(metrics.replies)}
+              </div>
+            </div>
+            {/* Retweets */}
+            <div className="tooltip" data-tip="Retweets">
+              <div className="flex items-center text-base-content/70">
+                <ArrowPathRoundedSquareIcon className="h-4 w-4 mr-1" /> {formatNumber(metrics.retweets)}
+              </div>
+            </div>
+            {/* Likes */}
+            <div className="tooltip" data-tip="Likes">
+              <div className="flex items-center text-base-content/70">
+                <HeartIcon className="h-4 w-4 mr-1" /> {formatNumber(metrics.likes)}
+              </div>
+            </div>
+            {/* Views */}
+            {metrics.views !== undefined && (
+              <div className="tooltip" data-tip="Views">
+                <div className="flex items-center text-base-content/70">
+                  <EyeIcon className="h-4 w-4 mr-1" /> {formatNumber(metrics.views)}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Link to Tweet */}
+          <div className="tooltip" data-tip="View on Twitter">
+            {tweet.url && tweet.url.startsWith('/') ? (
+              <Link
+                href={tweet.url}
+                className="btn btn-ghost btn-sm btn-circle"
+                aria-label="View on Twitter"
+              >
+                <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+              </Link>
+            ) : (
+              <a
                 href={tweet.url || `https://twitter.com/${author.username}/status/${tweet.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                size="small"
+                className="btn btn-ghost btn-sm btn-circle"
+                aria-label="View on Twitter"
               >
-                <LaunchIcon sx={{ fontSize: '1rem' }} />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Box>
-      </Box>
-    </Card>
+                <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

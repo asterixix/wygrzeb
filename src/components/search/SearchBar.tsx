@@ -1,43 +1,23 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Paper, 
-  InputBase, 
-  IconButton, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Popper, 
-  Grow, 
-  ClickAwayListener,
-  CircularProgress,
-  useTheme,
-  Theme,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import HistoryIcon from '@mui/icons-material/History';
-import ClearIcon from '@mui/icons-material/Clear';
 import { useSearch } from '@/context/SearchContext';
+import { MagnifyingGlassIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 interface SearchBarProps {
   initialQuery?: string;
   onSearch?: (query: string) => void;
   isLoading?: boolean;
-  theme?: Theme;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ 
   initialQuery = '',
   onSearch,
   isLoading = false,
-  theme: propTheme,
 }) => {
   const [inputValue, setInputValue] = useState(initialQuery);
-  const [showHistory, setShowHistory] = useState(false);
-  const anchorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const theme: Theme = propTheme || useTheme();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { 
     searchTerm,
@@ -62,7 +42,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
       } else {
         performSearch(inputValue);
       }
-      setShowHistory(false);
+      if (dropdownRef.current) {
+         dropdownRef.current.removeAttribute('open');
+      }
+      inputRef.current?.blur();
     }
   };
 
@@ -72,13 +55,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const handleClearInput = () => {
     setInputValue('');
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  const handleHistoryClick = () => {
-    setShowHistory((prev) => !prev);
+    inputRef.current?.focus();
   };
 
   const handleHistoryItemClick = (term: string) => {
@@ -88,112 +65,91 @@ const SearchBar: React.FC<SearchBarProps> = ({
     } else {
       performSearch(term);
     }
-    setShowHistory(false);
+    if (dropdownRef.current) {
+      dropdownRef.current.removeAttribute('open');
+    }
   };
 
-  const handleClickAway = () => {
-    setShowHistory(false);
-  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+         dropdownRef.current.removeAttribute('open');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div ref={anchorRef} style={{ position: 'relative', width: '100%', maxWidth: 800 }}>
-      <Paper
-        component="form"
-        onSubmit={handleSearch}
-        elevation={3}
-        sx={{
-          p: '2px 4px',
-          display: 'flex',
-          alignItems: 'center',
-          borderRadius: 30,
-          border: `1px solid ${theme.palette.divider}`,
-          transition: 'all 0.3s',
-          '&:hover': {
-            boxShadow: 3,
-          },
-        }}
-      >
-        <IconButton
+    <div className="relative w-full max-w-3xl"> 
+      <form onSubmit={handleSearch} className="join w-full shadow-md rounded-full border border-base-300 hover:border-primary transition-colors duration-200">
+        <button
           type="submit"
-          sx={{ p: '10px' }}
+          className="btn btn-ghost join-item rounded-l-full px-4"
           aria-label="search"
           disabled={isLoading}
         >
-          {isLoading ? <CircularProgress size={24} /> : <SearchIcon />}
-        </IconButton>
-        <InputBase
-          inputRef={inputRef}
-          sx={{ ml: 1, flex: 1 }}
+          {isLoading ? <span className="loading loading-spinner loading-sm"></span> : <MagnifyingGlassIcon className="h-5 w-5" />}
+        </button>
+        <input
+          ref={inputRef}
+          type="text"
+          className="input input-ghost join-item w-full focus:outline-none focus:bg-transparent focus:text-current"
           placeholder="Search for information..."
-          inputProps={{ 'aria-label': 'search for information' }}
+          aria-label="search for information"
           value={inputValue}
           onChange={handleInputChange}
-          onFocus={() => setShowHistory(false)}
         />
         {inputValue && (
-          <IconButton sx={{ p: '10px' }} aria-label="clear input" onClick={handleClearInput}>
-            <ClearIcon />
-          </IconButton>
-        )}
-        {searchHistory && searchHistory.length > 0 && (
-          <IconButton
-            sx={{ p: '10px' }}
-            aria-label="search history"
-            onClick={handleHistoryClick}
+          <button 
+            type="button" 
+            className="btn btn-ghost join-item px-3" 
+            aria-label="clear input" 
+            onClick={handleClearInput}
           >
-            <HistoryIcon />
-          </IconButton>
+            <XMarkIcon className="h-5 w-5" />
+          </button>
         )}
-      </Paper>
-
-      <Popper
-        open={showHistory}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        disablePortal
-        placement="bottom-start"
-        style={{ width: anchorRef.current?.clientWidth, zIndex: 1300 }}
-      >
-        {({ TransitionProps }) => (
-          <Grow {...TransitionProps}>
-            <Paper elevation={3} sx={{ mt: 1, maxHeight: 300, overflow: 'auto' }}>
-              <ClickAwayListener onClickAway={handleClickAway}>
-                <List dense>
-                  {searchHistory && searchHistory.map((search: string, index: number) => (
-                    <ListItem 
-                      button 
-                      key={index} 
-                      onClick={() => handleHistoryItemClick(search)}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: theme => theme.palette.action.hover,
-                        },
-                      }}
-                    >
-                      <HistoryIcon sx={{ mr: 2, fontSize: 20, opacity: 0.7 }} />
-                      <ListItemText primary={search} />
-                    </ListItem>
-                  ))}
-                  <ListItem 
-                    button 
-                    onClick={clearHistory}
-                    sx={{
-                      color: 'text.secondary',
-                      borderTop: theme => `1px solid ${theme.palette.divider}`,
-                      '&:hover': {
-                        backgroundColor: theme => theme.palette.action.hover,
-                      },
-                    }}
+        
+        {searchHistory && searchHistory.length > 0 && (
+          <div ref={dropdownRef} className="dropdown dropdown-end join-item">
+            <button 
+              type="button" 
+              tabIndex={0}
+              className="btn btn-ghost rounded-r-full px-4" 
+              aria-label="search history"
+            >
+              <ClockIcon className="h-5 w-5" />
+            </button>
+            <ul 
+              tabIndex={0}
+              className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-64 max-h-80 overflow-y-auto mt-2 border border-base-300"
+            >
+              {searchHistory.map((search: string, index: number) => (
+                <li key={index}>
+                  <button 
+                    className="flex items-center gap-2 w-full text-left"
+                    onClick={() => handleHistoryItemClick(search)}
                   >
-                    <ListItemText primary="Clear search history" sx={{ textAlign: 'center' }} />
-                  </ListItem>
-                </List>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
+                    <ClockIcon className="h-4 w-4 opacity-70" /> {search}
+                  </button>
+                </li>
+              ))}
+              <li><div className="divider my-1"></div></li>
+              <li>
+                <button 
+                  className="justify-center text-error"
+                  onClick={clearHistory}
+                >
+                  Clear search history
+                </button>
+              </li>
+            </ul>
+          </div>
         )}
-      </Popper>
+      </form>
     </div>
   );
 };

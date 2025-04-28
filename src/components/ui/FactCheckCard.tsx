@@ -1,25 +1,20 @@
+"use client";
+
 import React from 'react';
-import { 
-  Card, 
-  CardContent, 
-  Typography, 
-  Box, 
-  Link,
-  Divider,
-  Tooltip,
-  Chip,
-  Avatar,
-  Stack
-} from '@mui/material';
 import { FactCheck } from '@/types/news';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
-import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
-import LaunchIcon from '@mui/icons-material/Launch';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { format } from 'date-fns';
 import pl from 'date-fns/locale/pl';
+import Link from 'next/link'; // Keep for potential internal links
+import { 
+  CheckBadgeIcon as CheckBadgeIconSolid,
+  QuestionMarkCircleIcon,
+  HandThumbUpIcon,
+  HandThumbDownIcon,
+} from '@heroicons/react/24/solid'; // Use solid for badge icons
+import { 
+  CalendarDaysIcon, 
+  ArrowTopRightOnSquareIcon 
+} from '@heroicons/react/24/outline';
 
 interface FactCheckCardProps {
   factCheck: FactCheck;
@@ -27,7 +22,6 @@ interface FactCheckCardProps {
 
 const FactCheckCard: React.FC<FactCheckCardProps> = ({ factCheck }) => {
   
-  // Format date with error handling
   const formattedDate = factCheck.date ? formatDate(factCheck.date) : null;
   
   function formatDate(dateString: string) {
@@ -35,247 +29,134 @@ const FactCheckCard: React.FC<FactCheckCardProps> = ({ factCheck }) => {
       return format(new Date(dateString), 'd MMMM yyyy', { locale: pl });
     } catch (error) {
       console.error("Error formatting date:", error);
-      return dateString; // Return the original string if can't format
+      return dateString;
     }
   }
   
-  // Helper function to get rating color and icon
   const getRatingInfo = (rating: string | undefined) => {
-    if (!rating) {
-      return { 
-        color: 'var(--muted)', 
-        icon: <QuestionMarkIcon />, 
-        label: 'Unrated'
-      };
-    }
+    const iconClass = "h-4 w-4"; // Consistent icon size for badge
+    if (!rating) return { color: 'badge-neutral', icon: <QuestionMarkCircleIcon className={iconClass} />, label: 'Unrated' };
     
     const ratingLower = rating.toLowerCase();
     
-    if (ratingLower.includes('true') || 
-        ratingLower.includes('mostly true') || 
-        ratingLower.includes('correct') || 
-        ratingLower.includes('accurate') ||
-        ratingLower.includes('prawda')) {
-      return { 
-        color: 'var(--success)', 
-        icon: <ThumbUpAltIcon />, 
-        label: rating
-      };
-    } else if (ratingLower.includes('false') || 
-               ratingLower.includes('fake') || 
-               ratingLower.includes('incorrect') || 
-               ratingLower.includes('misleading') ||
-               ratingLower.includes('fałsz')) {
-      return { 
-        color: 'var(--error)', 
-        icon: <ThumbDownAltIcon />, 
-        label: rating
-      };
-    } else if (ratingLower.includes('partly') || 
-               ratingLower.includes('half') || 
-               ratingLower.includes('mixed') || 
-               ratingLower.includes('unclear') ||
-               ratingLower.includes('częściowo')) {
-      return { 
-        color: 'var(--warning)', 
-        icon: <QuestionMarkIcon />, 
-        label: rating
-      };
+    if (ratingLower.includes('true') || ratingLower.includes('correct') || ratingLower.includes('accurate') || ratingLower.includes('prawda')) {
+      return { color: 'badge-success', icon: <HandThumbUpIcon className={iconClass} />, label: rating };
+    } else if (ratingLower.includes('false') || ratingLower.includes('fake') || ratingLower.includes('incorrect') || ratingLower.includes('misleading') || ratingLower.includes('fałsz')) {
+      return { color: 'badge-error', icon: <HandThumbDownIcon className={iconClass} />, label: rating };
+    } else if (ratingLower.includes('partly') || ratingLower.includes('half') || ratingLower.includes('mixed') || ratingLower.includes('unclear') || ratingLower.includes('częściowo')) {
+      return { color: 'badge-warning', icon: <QuestionMarkCircleIcon className={iconClass} />, label: rating };
     }
     
-    return { 
-      color: 'var(--muted)', 
-      icon: <QuestionMarkIcon />, 
-      label: rating
-    };
+    return { color: 'badge-neutral', icon: <QuestionMarkCircleIcon className={iconClass} />, label: rating };
   };
   
   const ratingInfo = getRatingInfo(factCheck.rating);
-  
-  // Safe access to source data
   const sourceName = factCheck.source?.name || 'Unknown Fact-Checker';
   const sourceUrl = factCheck.source?.url || factCheck.url || '#';
   
   return (
-    <Card 
-      elevation={1}
-      sx={{ 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'all 0.2s ease-in-out',
-        '&:hover': {
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          transform: 'translateY(-2px)'
-        },
-        borderLeft: '4px solid var(--factcheck-color)'
-      }}
-      className="factcheck-card"
-    >
-      <CardContent sx={{ flexGrow: 1, pt: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {factCheck.logo ? (
-              <Avatar 
-                src={factCheck.logo}
-                alt={sourceName}
-                sx={{ width: 40, height: 40, mr: 1.5 }}
-                variant="rounded"
-              />
-            ) : (
-              <Avatar
-                sx={{ 
-                  width: 40, 
-                  height: 40, 
-                  mr: 1.5, 
-                  bgcolor: 'var(--factcheck-color)',
-                  color: 'white'
-                }}
-                variant="rounded"
-              >
-                <VerifiedIcon />
-              </Avatar>
-            )}
-            
-            <Box>
-              <Link 
+    // DaisyUI Card
+    <div className="card card-compact bg-base-100 shadow-md border border-base-300 border-l-4 border-l-green-600 transition-all duration-200 ease-in-out hover:shadow-lg hover:-translate-y-0.5 h-full flex flex-col factcheck-card">
+      <div className="card-body flex-grow pt-4 pb-2">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center">
+            {/* Avatar */}
+            <div className="avatar mr-3">
+              <div className="w-10 h-10 rounded ring ring-offset-base-100 ring-offset-1 flex items-center justify-center bg-green-600 text-white">
+                {factCheck.logo ? (
+                  <img src={factCheck.logo} alt={sourceName} className="rounded" />
+                ) : (
+                  <CheckBadgeIconSolid className="h-6 w-6" />
+                )}
+              </div>
+            </div>
+            <div>
+              <a 
                 href={sourceUrl} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                sx={{ 
-                  textDecoration: 'none', 
-                  color: 'inherit', 
-                  '&:hover': { textDecoration: 'underline' } 
-                }}
+                className="link link-hover font-medium text-sm"
               >
-                <Typography variant="subtitle1" component="span" fontWeight="medium">
-                  {sourceName}
-                </Typography>
-              </Link>
-              <Typography variant="caption" color="text.secondary" display="block">
-                Fact-checker
-              </Typography>
-            </Box>
-          </Box>
+                {sourceName}
+              </a>
+              <p className="text-xs text-base-content/70">Fact-checker</p>
+            </div>
+          </div>
           
-          <Box>
-            <Tooltip title={ratingInfo.label}>
-              <Chip
-                icon={<Box sx={{ color: 'white', display: 'flex', alignItems: 'center' }}>{ratingInfo.icon}</Box>}
-                label={ratingInfo.label}
-                sx={{ 
-                  bgcolor: ratingInfo.color,
-                  color: 'white',
-                  fontWeight: 'bold',
-                  '& .MuiChip-icon': {
-                    color: 'white'
-                  }
-                }}
-              />
-            </Tooltip>
-          </Box>
-        </Box>
+          {/* Rating Badge */}
+          <div className="tooltip tooltip-left" data-tip={ratingInfo.label}>
+            <div className={`badge ${ratingInfo.color} text-white font-bold gap-1`}>
+              {ratingInfo.icon}
+              <span className="hidden sm:inline">{ratingInfo.label}</span>
+            </div>
+          </div>
+        </div>
         
-        <Typography 
-          variant="h6" 
-          component="h2" 
-          gutterBottom
-          sx={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            lineHeight: 1.3,
-          }}
-        >
+        {/* Claim */}
+        <h2 className="card-title text-base font-semibold leading-snug mb-2 line-clamp-2">
           {factCheck.claim || 'Unspecified Claim'}
-        </Typography>
+        </h2>
         
+        {/* Claimant */}
         {factCheck.claimant && (
-          <Typography 
-            variant="body2" 
-            color="primary"
-            fontWeight="medium"
-            sx={{ mb: 1 }}
-          >
+          <p className="text-sm text-primary font-medium mb-1">
             Claimed by: {factCheck.claimant}
-          </Typography>
+          </p>
         )}
         
+        {/* Date */}
         {formattedDate && (
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <CalendarTodayIcon fontSize="small" sx={{ mr: 0.5, color: 'var(--muted)' }} />
-            <Typography variant="caption" color="text.secondary">
-              {formattedDate}
-            </Typography>
-          </Box>
+          <div className="flex items-center text-xs text-base-content/70 mb-2">
+            <CalendarDaysIcon className="h-3 w-3 mr-1" /> {formattedDate}
+          </div>
         )}
         
+        {/* Summary */}
         {factCheck.summary && (
-          <Typography 
-            variant="body2" 
-            color="text.secondary"
-            sx={{
-              mb: 2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
+          <p className="text-sm text-base-content/80 mb-3 line-clamp-3">
             {factCheck.summary}
-          </Typography>
+          </p>
         )}
         
+        {/* Topics */}
         {Array.isArray(factCheck.topics) && factCheck.topics.length > 0 && (
-          <Box sx={{ mt: 2, mb: 1 }}>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-              {factCheck.topics.map((topic, index) => (
-                <Chip
-                  key={index}
-                  label={topic}
-                  size="small"
-                  sx={{ 
-                    my: 0.5,
-                    bgcolor: 'var(--card-border)',
-                    fontSize: '0.7rem'
-                  }}
-                />
-              ))}
-            </Stack>
-          </Box>
+          <div className="mt-2 mb-1 flex flex-wrap gap-1">
+            {factCheck.topics.map((topic, index) => (
+              <div key={index} className="badge badge-sm badge-outline text-xs">
+                {topic}
+              </div>
+            ))}
+          </div>
         )}
-      </CardContent>
+      </div>
       
-      <Box sx={{ mt: 'auto' }}>
-        <Divider />
-        
-        <Box sx={{ p: 2 }}>
-          <Tooltip title="Read full fact-check">
+      {/* Footer Link */}
+      <div className="mt-auto">
+        <div className="divider my-0"></div>
+        <div className="p-4">
+          {factCheck.url && factCheck.url.startsWith('/') ? (
             <Link
+              href={factCheck.url}
+              className="link link-success link-hover text-sm font-medium flex items-center"
+            >
+              Read full fact-check
+              <ArrowTopRightOnSquareIcon className="h-4 w-4 ml-1" />
+            </Link>
+          ) : (
+            <a
               href={factCheck.url || "#"}
               target="_blank"
               rel="noopener noreferrer"
-              sx={{ 
-                display: 'flex',
-                alignItems: 'center',
-                color: 'var(--factcheck-color)',
-                fontWeight: 'medium',
-                textDecoration: 'none',
-                '&:hover': {
-                  textDecoration: 'underline'
-                }
-              }}
+              className="link link-success link-hover text-sm font-medium flex items-center"
             >
               Read full fact-check
-              <LaunchIcon sx={{ ml: 0.5, fontSize: '1rem' }} />
-            </Link>
-          </Tooltip>
-        </Box>
-      </Box>
-    </Card>
+              <ArrowTopRightOnSquareIcon className="h-4 w-4 ml-1" />
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

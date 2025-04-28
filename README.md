@@ -16,8 +16,6 @@ Aplikacja korzysta obecnie z następujących źródeł danych i API:
 *   **Wiadomości**:
     *   Google News (przez SerpApi lub dedykowane API)
     *   NewsAPI
-*   **Fact-Checking**:
-    *   Google Fact Check API
 *   **Dane Publiczne (Polska)**:
     *   DANE.GOV.PL API (`api.dane.gov.pl`)
     *   Statistics Poland (GUS) API (`api-dbw.stat.gov.pl`)
@@ -67,7 +65,6 @@ W głównym katalogu projektu utwórz plik `.env.local`. Skopiuj zawartość z `
 
 # Klucze API (uzyskaj je z odpowiednich serwisów)
 NEWS_API_KEY=twoj_klucz_newsapi
-GOOGLE_FACT_CHECK_API_KEY=twoj_klucz_google_fact_check
 # SERPAPI_KEY=twoj_klucz_serpapi # Jeśli używasz SerpApi dla Google News
 # GOOGLE_NEWS_API_KEY= # Alternatywnie, jeśli jest dedykowane API
 
